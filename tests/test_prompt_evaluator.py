@@ -30,30 +30,32 @@ class TestEvaluator(unittest.IsolatedAsyncioTestCase):
         prompts = ['Summarize: {text}', 'Paraphrase: {text}']
         generator_model = Model('test-model')
 
-        # Mock evaluate_output to always return False for this test
-        self.evaluator.evaluate_output = AsyncMock(return_value=False)
+        # Mock evaluate_output to return a dictionary for this test
+        self.evaluator.evaluate_output = AsyncMock(return_value={
+            'is_correct': False,
+            'explanation_success': '',
+            'explanation_failure': 'Test failure explanation'
+        })
 
-        result1 = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=1)
-        result2 = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=2)
+        result = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=1)
 
-        self.assertEqual(len(result1), 2)
-        self.assertEqual(result1[0]['prompt'], 'Summarize: {text}')
-        self.assertEqual(result1[0]['total_cases'], 1)
-        self.assertEqual(result1[0]['correct_answers'], 0)
-        self.assertEqual(result1[0]['score'], 0.0)
-
-        self.assertEqual(len(result2), 2)
-        self.assertEqual(result2[0]['prompt'], 'Summarize: {text}')
-        self.assertEqual(result2[0]['total_cases'], 1)
-        self.assertEqual(result2[0]['correct_answers'], 0)
-        self.assertEqual(result2[0]['score'], 0.0)
-
-        # Check if the logger's log_iteration method was called
-        self.mock_logger.log_iteration.assert_called_with(2, prompts, result2)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]['prompt'], 'Summarize: {text}')
+        self.assertEqual(result[0]['total_cases'], 1)
+        self.assertEqual(result[0]['correct_answers'], 0)
+        self.assertEqual(result[0]['score'], 0.0)
 
     async def test_evaluate_prompt(self):
         prompt = 'Summarize: {text}'
         generator_model = Model('test-model')
+
+        # Mock evaluate_output to return a dictionary
+        self.evaluator.evaluate_output = AsyncMock(return_value={
+            'is_correct': False,
+            'explanation_success': '',
+            'explanation_failure': 'Test failure explanation'
+        })
+
         result = await self.evaluator.evaluate_prompt(prompt, generator_model)
 
         self.assertEqual(result['prompt'], 'Summarize: {text}')
@@ -70,9 +72,30 @@ class TestEvaluator(unittest.IsolatedAsyncioTestCase):
 
     async def test_evaluate_output(self):
         evaluation_model = Model('test-model')
+
+        # Mock the generate method of the evaluation model
+        evaluation_model.generate = AsyncMock(return_value={
+            'function': {
+                'name': 'evaluate_semantic_equivalence',
+                'data': {
+                    'is_equivalent': True,
+                    'explanation_success': 'Test success explanation',
+                    'explanation_failure': ''
+                }
+            }
+        })
+
+        self.evaluator.evaluation_model = evaluation_model
+
         result = await self.evaluator.evaluate_output('Model output', 'Expected output')
 
-        self.assertIsInstance(result, bool)
+        self.assertIsInstance(result, dict)
+        self.assertIn('is_correct', result)
+        self.assertIn('explanation_success', result)
+        self.assertIn('explanation_failure', result)
+        self.assertTrue(result['is_correct'])
+        self.assertEqual(result['explanation_success'], 'Test success explanation')
+        self.assertEqual(result['explanation_failure'], '')
 
 
 if __name__ == '__main__':

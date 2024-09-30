@@ -11,25 +11,22 @@ ORIGINAL_PROMPT = {
 }
 
 # Optimization settings
-MAX_ITERATIONS = 3
-PARALLEL_VARIATIONS = 6
+MAX_ITERATIONS = 1
+PARALLEL_VARIATIONS = 1
 
 # Model settings
 EVALUATION_MODEL = "gpt-4o-mini"  # Model used for evaluating outputs
-PROMPT_GENERATOR_MODEL = "gpt-4o"  # Model used for generating prompt variations
+PROMPT_GENERATOR_MODEL = "gpt-4o-mini"  # Model used for generating prompt variations
+GENERATOR_MODEL = "gpt-4o-mini"  # Model used for generating responses, the prompt will be optimized for this model
 
 # Provider settings
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-# Logging settings
-LOG_LEVEL = "INFO"
-LOG_FILE = "prompt_optimizer.log"
 
 # Data paths
 DATA_DIR = "data"
 DATASET_DIR = os.path.join(DATA_DIR, "dataset")
 DATASET_FILE = "dataset.json"
-MODEL_OUTPUTS_DIR = os.path.join(DATA_DIR, "model_outputs")
+LOG_DIR = "logs"
 
 # Prompt generation settings
 MAX_PROMPT_LENGTH = 2000

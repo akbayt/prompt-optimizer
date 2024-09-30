@@ -7,6 +7,11 @@ from datetime import datetime
 class PerformanceLogger:
     def __init__(self, log_dir: str, original_prompt: str):
         self.log_dir = log_dir
+
+        # if log_dir does not exist, create it
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log_file = os.path.join(self.log_dir, f"performance_log_{self.timestamp}.json")
         self.log_data = {
