@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from config import OPENAI_API_KEY
 
 # Load environment variables
 load_dotenv()
@@ -8,7 +9,7 @@ load_dotenv()
 
 class OpenAIProvider:
     def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = OPENAI_API_KEY
         if not self.api_key:
             raise ValueError("OpenAI API key not found in environment variables")
         self.client = OpenAI(api_key=self.api_key)
