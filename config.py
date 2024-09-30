@@ -11,8 +11,8 @@ ORIGINAL_PROMPT = {
 }
 
 # Optimization settings
-MAX_ITERATIONS = 1
-PARALLEL_VARIATIONS = 1
+MAX_ITERATIONS = 2
+PARALLEL_VARIATIONS = 3
 
 # Model settings
 EVALUATION_MODEL = "gpt-4o-mini"  # Model used for evaluating outputs

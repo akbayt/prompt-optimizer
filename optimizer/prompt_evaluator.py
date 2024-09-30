@@ -84,12 +84,11 @@ class Evaluator:
     {failure_list}
 
     Please provide a concise summary of these evaluations. Your summary should:
-    1. Identify the key strengths of the successful prompts.
-    2. Highlight the main weaknesses or issues with the failed prompts.
-    3. Suggest potential areas for improvement in the prompt design.
-    4. Offer insights into any patterns or trends you notice across the evaluations.
+    1. Summarize the key strengths of the successful prompts.
+    2. Explain the main weaknesses or issues with the failed prompts.
+    3. Suggest potential areas for improvement in the prompt design with the insights into any pattern or trends you noticed.
 
-    Your summary should be clear, analytical, and focused on helping improve future prompt performance."""
+    Your summary should be clear, brief, and focused on helping improve future prompt performance."""
 
         response = await self.evaluation_model.generate(prompt)
 
@@ -141,10 +140,15 @@ class Evaluator:
 
             if response.get('function'):
                 function_data = response['function'].get('data', {})
+                is_correct = function_data.get('is_equivalent', False)
+
+                explanation_success = function_data.get('explanation_success', '') if is_correct else ''
+                explanation_failure = function_data.get('explanation_failure', '') if not is_correct else ''
+
                 return {
-                    'is_correct': function_data.get('is_equivalent', False),
-                    'explanation_success': function_data.get('explanation_success', ''),
-                    'explanation_failure': function_data.get('explanation_failure', '')
+                    'is_correct': is_correct,
+                    'explanation_success': explanation_success,
+                    'explanation_failure': explanation_failure
                 }
             else:
                 print("Unexpected response format from evaluation model")
