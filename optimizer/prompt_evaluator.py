@@ -7,10 +7,11 @@ import os
 
 
 class Evaluator:
-    def __init__(self):
+    def __init__(self, log_file: str = PERFORMANCE_LOG):
         self.evaluation_model = Model(EVALUATION_MODEL)
         self.data_loader = DataLoader()
         self.dataset = self.data_loader.load_data()
+        self.log_file = log_file
         self.log = []
 
     async def evaluate_prompts(self, prompts: List[str], generator_model: Model, iteration: int) -> List[
@@ -106,10 +107,11 @@ class Evaluator:
             'evaluations': self.log[-1]
         }
 
-        os.makedirs(os.path.dirname(PERFORMANCE_LOG), exist_ok=True)
-        with open(PERFORMANCE_LOG, 'a') as f:
-            json.dump(log_entry, f)
-            f.write('\n')
+        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
+        with open(self.log_file, 'a') as f:
+            json_str = json.dumps(log_entry, indent=2)
+            f.write(json_str)
+            f.write('\n\n')  # Add an extra newline for separation between entries
 
     def get_log(self):
         return self.log

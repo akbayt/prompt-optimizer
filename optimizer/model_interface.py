@@ -14,6 +14,9 @@ class Model:
     def _setup_provider(self):
         if self.model_name.startswith(("gpt", "text-davinci")):
             self.provider = OpenAIProvider()
+        elif self.model_name.startswith("test-"):
+            # For test models, use a dummy provider
+            self.provider = DummyProvider()
         else:
             raise ValueError(f"Unsupported model: {self.model_name}")
 
@@ -44,3 +47,18 @@ class Model:
             "temperature": self.temperature,
             "provider": self.provider.get_provider_name()
         }
+
+
+class DummyProvider:
+    async def generate(self, **kwargs):
+        return {
+            "message": "This is a dummy response for testing purposes.",
+            "function": None,
+            "error": None
+        }
+
+    def get_provider_name(self):
+        return "DummyProvider"
+
+    def create_response(self, **kwargs):
+        return kwargs
