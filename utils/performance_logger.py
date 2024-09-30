@@ -2,6 +2,7 @@ import json
 import os
 from typing import Dict, Any, List
 from datetime import datetime
+from config import HISTORICAL_PROMPTS_COUNT
 
 
 class PerformanceLogger:
@@ -41,6 +42,31 @@ class PerformanceLogger:
 
     def get_log_file_path(self) -> str:
         return self.log_file
+
+    def get_historical_prompts(self) -> List[Dict[str, Any]]:
+        all_prompts = []
+        for log in self.log_data["optimization_logs"]:
+            all_prompts.extend(log["evaluations"])
+
+        # Sort prompts by score in descending order
+        sorted_prompts = sorted(all_prompts, key=lambda x: x['score'], reverse=True)
+
+        # if the number of prompts is less than the historical prompts count, return all prompts
+        if len(sorted_prompts) <= HISTORICAL_PROMPTS_COUNT:
+            return sorted_prompts
+
+        # Calculate how many prompts to take from top and bottom
+        half_count = HISTORICAL_PROMPTS_COUNT // 2
+        remainder = HISTORICAL_PROMPTS_COUNT % 2
+
+        # Get top performing prompts
+        top_prompts = sorted_prompts[:half_count + remainder]
+
+        # Get bottom performing prompts
+        bottom_prompts = sorted_prompts[-half_count:]
+
+        # Combine and return the results
+        return top_prompts + bottom_prompts
 
 
 def create_logger(log_dir: str, original_prompt: str) -> PerformanceLogger:

@@ -39,7 +39,6 @@ async def optimize_prompt() -> str:
         for eval in evaluations:
             print(f"Prompt: {eval['prompt']}")
             print(f"Score: {eval['score']:.4f}")
-            print(f"Summary: {eval['summary']}")
             print("---------------")
 
         # Find the best performing prompt
@@ -56,8 +55,11 @@ async def optimize_prompt() -> str:
             print(f"\nAccuracy threshold reached! Optimization complete.")
             break
 
+        # Get historical prompts
+        historical_prompts = logger.get_historical_prompts()
+
         # Generate new prompt suggestions
-        prompts_and_evals = [(eval['prompt'], eval['summary'], eval['score']) for eval in evaluations]
+        prompts_and_evals = [(eval['prompt'], eval['summary'], eval['score']) for eval in historical_prompts]
         suggestions = await generator.generate_suggestions(prompts_and_evals, PARALLEL_VARIATIONS)
 
         print("\nNew prompt suggestions:")

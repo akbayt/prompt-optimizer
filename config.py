@@ -11,8 +11,9 @@ ORIGINAL_PROMPT = {
 }
 
 # Optimization settings
-MAX_ITERATIONS = 2
+MAX_ITERATIONS = 10
 PARALLEL_VARIATIONS = 3
+HISTORICAL_PROMPTS_COUNT = 10 # the number of prompts to keep in memory for historical analysis
 
 # Model settings
 EVALUATION_MODEL = "gpt-4o-mini"  # Model used for evaluating outputs
