@@ -1,5 +1,6 @@
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from providers.openai_provider import OpenAIProvider
+from providers.base_provider import ProviderResponse
 
 
 class Model:
@@ -14,12 +15,21 @@ class Model:
         else:
             raise ValueError(f"Unsupported model: {self.model_name}")
 
-    async def generate(self, prompt: str) -> str:
-        return await self.provider.generate(self.model_name, prompt, self.temperature)
+    async def generate(self,
+                       prompt: str,
+                       functions: Optional[List[Dict[str, Any]]] = None,
+                       function_call: Optional[Dict[str, str]] = None) -> ProviderResponse:
+        return await self.provider.generate(
+            model_name=self.model_name,
+            prompt=prompt,
+            temperature=self.temperature,
+            functions=functions,
+            function_call=function_call
+        )
 
     def get_model_info(self) -> Dict[str, Any]:
         return {
             "model_name": self.model_name,
             "temperature": self.temperature,
-            "provider": self.provider.__class__.__name__
+            "provider": self.provider.get_provider_name()
         }
