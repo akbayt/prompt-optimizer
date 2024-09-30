@@ -1,14 +1,14 @@
 import json
 import os
 from typing import List, Dict, Any
-from config import DATASET_DIR, DATASET_FILE, CURRENT_PROMPT
+from config import DATASET_DIR, DATASET_FILE, ORIGINAL_PROMPT
 
 class InvalidDataPointError(Exception):
     """Custom exception for invalid data points."""
     pass
 
 class DataLoader:
-    def __init__(self, dataset_dir=DATASET_DIR, dataset_file=DATASET_FILE, current_prompt=CURRENT_PROMPT):
+    def __init__(self, dataset_dir=DATASET_DIR, dataset_file=DATASET_FILE, current_prompt=ORIGINAL_PROMPT):
         self.dataset_path = os.path.join(dataset_dir, dataset_file)
         self.current_prompt = current_prompt
 

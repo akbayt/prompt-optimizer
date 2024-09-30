@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Current prompt to optimize
-CURRENT_PROMPT = {
+# Original prompt to optimize
+ORIGINAL_PROMPT = {
     "text": "Summarize the following text in one sentence: {text}",
     "variables": ["text"]
 }
@@ -30,7 +30,6 @@ DATA_DIR = "data"
 DATASET_DIR = os.path.join(DATA_DIR, "dataset")
 DATASET_FILE = "dataset.json"
 MODEL_OUTPUTS_DIR = os.path.join(DATA_DIR, "model_outputs")
-PERFORMANCE_LOG = "performance_log.json"
 
 # Prompt generation settings
 MAX_PROMPT_LENGTH = 2000
@@ -38,3 +37,5 @@ MAX_PROMPT_LENGTH = 2000
 # Error handling
 MAX_RETRIES = 3
 RETRY_DELAY = 5  # seconds
+
+ACCURACY_THRESHOLD = 0.95

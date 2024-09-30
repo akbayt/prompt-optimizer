@@ -1,18 +1,15 @@
 from typing import List, Dict, Any
 from optimizer.model_interface import Model
-from config import EVALUATION_MODEL, PERFORMANCE_LOG
+from config import EVALUATION_MODEL
 from utils.data_loader import DataLoader
-import json
-import os
-
+from utils.performance_logger import PerformanceLogger
 
 class Evaluator:
-    def __init__(self, log_file: str = PERFORMANCE_LOG):
+    def __init__(self, logger: PerformanceLogger):
         self.evaluation_model = Model(EVALUATION_MODEL)
         self.data_loader = DataLoader()
         self.dataset = self.data_loader.load_data()
-        self.log_file = log_file
-        self.log = []
+        self.logger = logger
 
     async def evaluate_prompts(self, prompts: List[str], generator_model: Model, iteration: int) -> List[
         Dict[str, Any]]:
@@ -21,8 +18,9 @@ class Evaluator:
             evaluation = await self.evaluate_prompt(prompt, generator_model)
             evaluations.append(evaluation)
 
-        self.log.append(evaluations)
-        self.save_log(iteration)
+        # Log the iteration using the PerformanceLogger
+        self.logger.log_iteration(iteration, prompts, evaluations)
+
         return evaluations
 
     async def evaluate_prompt(self, prompt: str, generator_model: Model) -> Dict[str, Any]:
@@ -100,27 +98,3 @@ class Evaluator:
         else:
             print("Unexpected response format from evaluation model")
             return False
-
-    def save_log(self, iteration: int):
-        log_entry = {
-            'iteration': iteration,
-            'evaluations': self.log[-1]
-        }
-
-        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
-
-        # Read existing log entries
-        existing_entries = []
-        if os.path.exists(self.log_file) and os.path.getsize(self.log_file) > 0:
-            with open(self.log_file, 'r') as f:
-                existing_entries = json.load(f)
-
-        # Append new entry
-        existing_entries.append(log_entry)
-
-        # Write all entries back to file
-        with open(self.log_file, 'w') as f:
-            json.dump(existing_entries, f, indent=2)
-
-    def get_log(self):
-        return self.log
