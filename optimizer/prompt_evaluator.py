@@ -108,10 +108,19 @@ class Evaluator:
         }
 
         os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
-        with open(self.log_file, 'a') as f:
-            json_str = json.dumps(log_entry, indent=2)
-            f.write(json_str)
-            f.write('\n\n')  # Add an extra newline for separation between entries
+
+        # Read existing log entries
+        existing_entries = []
+        if os.path.exists(self.log_file) and os.path.getsize(self.log_file) > 0:
+            with open(self.log_file, 'r') as f:
+                existing_entries = json.load(f)
+
+        # Append new entry
+        existing_entries.append(log_entry)
+
+        # Write all entries back to file
+        with open(self.log_file, 'w') as f:
+            json.dump(existing_entries, f, indent=2)
 
     def get_log(self):
         return self.log

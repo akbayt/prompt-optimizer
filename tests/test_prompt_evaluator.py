@@ -39,33 +39,48 @@ class TestEvaluator(unittest.IsolatedAsyncioTestCase):
         # Mock evaluate_output to always return False for this test
         self.evaluator.evaluate_output = AsyncMock(return_value=False)
 
-        result = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=1)
+        result1 = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=1)
+        result2 = await self.evaluator.evaluate_prompts(prompts, generator_model, iteration=2)
 
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]['prompt'], 'Summarize: {text}')
-        self.assertEqual(result[0]['total_cases'], 1)
-        self.assertEqual(result[0]['correct_answers'], 0)
-        self.assertEqual(result[0]['score'], 0.0)
+        self.assertEqual(len(result1), 2)
+        self.assertEqual(result1[0]['prompt'], 'Summarize: {text}')
+        self.assertEqual(result1[0]['total_cases'], 1)
+        self.assertEqual(result1[0]['correct_answers'], 0)
+        self.assertEqual(result1[0]['score'], 0.0)
+
+        self.assertEqual(len(result2), 2)
+        self.assertEqual(result2[0]['prompt'], 'Summarize: {text}')
+        self.assertEqual(result2[0]['total_cases'], 1)
+        self.assertEqual(result2[0]['correct_answers'], 0)
+        self.assertEqual(result2[0]['score'], 0.0)
 
         # Check if log file was created and contains the correct data
         with open(self.temp_log_file.name, 'r') as f:
-            log_content = f.read().strip()
-            log_entry = json.loads(log_content)
+            log_content = json.load(f)
 
-            self.assertEqual(log_entry['iteration'], 1)
-            self.assertEqual(len(log_entry['evaluations']), 2)
+            self.assertEqual(len(log_content), 2)  # Two log entries
 
-            # Check the first prompt's evaluation
-            self.assertEqual(log_entry['evaluations'][0]['prompt'], 'Summarize: {text}')
-            self.assertEqual(log_entry['evaluations'][0]['total_cases'], 1)
-            self.assertEqual(log_entry['evaluations'][0]['correct_answers'], 0)
-            self.assertEqual(log_entry['evaluations'][0]['score'], 0.0)
+            # Check first log entry
+            self.assertEqual(log_content[0]['iteration'], 1)
+            self.assertEqual(len(log_content[0]['evaluations']), 2)
 
-            # Check the second prompt's evaluation
-            self.assertEqual(log_entry['evaluations'][1]['prompt'], 'Paraphrase: {text}')
-            self.assertEqual(log_entry['evaluations'][1]['total_cases'], 1)
-            self.assertEqual(log_entry['evaluations'][1]['correct_answers'], 0)
-            self.assertEqual(log_entry['evaluations'][1]['score'], 0.0)
+            # Check second log entry
+            self.assertEqual(log_content[1]['iteration'], 2)
+            self.assertEqual(len(log_content[1]['evaluations']), 2)
+
+            # Check details of the first prompt in the second iteration
+            self.assertEqual(log_content[1]['evaluations'][0]['prompt'], 'Summarize: {text}')
+            self.assertEqual(log_content[1]['evaluations'][0]['total_cases'], 1)
+            self.assertEqual(log_content[1]['evaluations'][0]['correct_answers'], 0)
+            self.assertEqual(log_content[1]['evaluations'][0]['score'], 0.0)
+
+            # Check that the results array contains the expected data
+            self.assertEqual(len(log_content[1]['evaluations'][0]['results']), 1)
+            self.assertEqual(log_content[1]['evaluations'][0]['results'][0]['prompt'], 'Summarize: Sample text')
+            self.assertEqual(log_content[1]['evaluations'][0]['results'][0]['model_output'],
+                             'This is a dummy response for testing purposes.')
+            self.assertEqual(log_content[1]['evaluations'][0]['results'][0]['expected_output'], 'Expected output')
+            self.assertEqual(log_content[1]['evaluations'][0]['results'][0]['is_correct'], False)
 
     async def test_evaluate_prompt(self):
         prompt = 'Summarize: {text}'
@@ -100,7 +115,8 @@ class TestEvaluator(unittest.IsolatedAsyncioTestCase):
         with open(self.temp_log_file.name, 'r') as f:
             log_content = f.read().strip()
             # Parse the JSON content
-            log_entry = json.loads(log_content)
+            log_entries = json.loads(log_content)
+            log_entry = log_entries[0]
 
             # Check the structure and content
             self.assertEqual(log_entry['iteration'], 1)
@@ -109,15 +125,17 @@ class TestEvaluator(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(log_entry['evaluations'][0]['score'], 0.5)
 
             # Check the formatting
-            expected_format = '''{
-  "iteration": 1,
-  "evaluations": [
-    {
-      "prompt": "Test prompt",
-      "score": 0.5
-    }
-  ]
-}'''
+            expected_format = '''[
+  {
+    "iteration": 1,
+    "evaluations": [
+      {
+        "prompt": "Test prompt",
+        "score": 0.5
+      }
+    ]
+  }
+]'''
             self.assertEqual(log_content, expected_format)
 
     def test_get_log(self):
