@@ -7,8 +7,9 @@ class PromptGenerator:
     def __init__(self, prompt_generator_model=PROMPT_GENERATOR_MODEL):
         self.model = Model(prompt_generator_model)
 
-    async def generate_suggestions(self, prompts_and_scores: List[Tuple[str, float]], num_suggestions: int = 3) -> Dict[
-        str, Any]:
+    async def generate_suggestions(self, prompts_and_scores: List[Tuple[str, str, float]], num_suggestions: int = 3) -> \
+            Dict[
+                str, Any]:
         # Prepare the input for the LLM
         prompt = self._prepare_prompt(prompts_and_scores, num_suggestions)
 
@@ -67,12 +68,14 @@ class PromptGenerator:
 
         return result
 
-    def _prepare_prompt(self, prompts_and_scores: List[Tuple[str, float]], num_suggestions: int) -> str:
+    def _prepare_prompt(self, prompts_and_scores: List[Tuple[str, str, float]], num_suggestions: int) -> str:
         prompt_list = "\n".join(
-            [f"<Item>\n\t<Prompt>\n\t\t{prompt}\n\t</Prompt>\n\t<Score>\n\t\t{score}\n\t</Score>\n</Item>" for
-             prompt, score in prompts_and_scores])
+            [
+                f"<Item>\n\t<Prompt>\n\t\t{prompt}\n\t</Prompt>\n\t<Summary>\n\t\t{summary}\n\t</Summary>\n\t<Score>\n\t\t{score}\n\t</Score>\n</Item>"
+                for
+                prompt, summary, score in prompts_and_scores])
 
-        return f"""Analyze the following list of prompts and their performance scores, then generate new suggestions:
+        return f"""Analyze the following list of prompts, their summaries, and their performance scores, then generate new suggestions:
 
 {prompt_list}
 

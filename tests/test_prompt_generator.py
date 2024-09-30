@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock, AsyncMock
 from optimizer.prompt_generator import PromptGenerator
 
+
 class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.mock_model = Mock()
@@ -12,9 +13,9 @@ class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
     async def test_generate_suggestions(self):
         # Arrange
         prompts_and_scores = [
-            ("Summarize this text: {text}", 0.7),
-            ("Give a brief summary of: {text}", 0.8),
-            ("Provide a concise summary for the following: {text}", 0.6)
+            ("Summarize this text: {text}", "This prompt is concise and direct.", 0.7),
+            ("Give a brief summary of: {text}", "This prompt is clear but could be more specific.", 0.8),
+            ("Provide a concise summary for the following: {text}", "This prompt is slightly verbose.", 0.6)
         ]
         num_suggestions = 2
 
@@ -61,8 +62,8 @@ class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
     def test_prepare_prompt(self):
         # Arrange
         prompts_and_scores = [
-            ("Summarize this text: {text}", 0.7),
-            ("Give a brief summary of: {text}", 0.8)
+            ("Summarize this text: {text}", "This prompt is concise and direct.", 0.7),
+            ("Give a brief summary of: {text}", "This prompt is clear but could be more specific.", 0.8)
         ]
         num_suggestions = 2
 
@@ -72,14 +73,16 @@ class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
         # Assert
         self.assertIn("Summarize this text: {text}", prepared_prompt)
         self.assertIn("Give a brief summary of: {text}", prepared_prompt)
+        self.assertIn("This prompt is concise and direct.", prepared_prompt)
+        self.assertIn("This prompt is clear but could be more specific.", prepared_prompt)
         self.assertIn("generate 2 new prompt variations", prepared_prompt)
         self.assertIn("Use the 'analyze_and_suggest_prompts' function", prepared_prompt)
 
     async def test_generate_suggestions_error_handling(self):
         # Arrange
         prompts_and_scores = [
-            ("Summarize this text: {text}", 0.7),
-            ("Give a brief summary of: {text}", 0.8)
+            ("Summarize this text: {text}", "This prompt is concise and direct.", 0.7),
+            ("Give a brief summary of: {text}", "This prompt is clear but could be more specific.", 0.8)
         ]
         num_suggestions = 2
 
@@ -97,9 +100,9 @@ class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
     async def test_non_mocked_generator(self):
         self.prompt_generator = PromptGenerator()
         prompts_and_scores = [
-            ("Summarize this text: {text}", 0.7),
-            ("Give a brief summary of: {text}", 0.8),
-            ("Provide a concise summary for the following: {text}", 0.6)
+            ("Summarize this text: {text}", "This prompt is concise and direct.", 0.7),
+            ("Give a brief summary of: {text}", "This prompt is clear but could be more specific.", 0.8),
+            ("Provide a concise summary for the following: {text}", "This prompt is slightly verbose.", 0.6)
         ]
         num_suggestions = 2
 
@@ -112,6 +115,7 @@ class TestPromptGenerator(unittest.IsolatedAsyncioTestCase):
         self.assertIn("low_performance_factors", result["analysis"])
         self.assertIn("suggestions", result)
         self.assertEqual(len(result["suggestions"]), num_suggestions)
+
 
 if __name__ == '__main__':
     unittest.main()
