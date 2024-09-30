@@ -80,5 +80,3 @@ Identify factors contributing to high and low performance. Then, generate {num_s
 
 Use the 'analyze_and_suggest_prompts' function to structure your response.
 """
-
-# Note: We've removed the _parse_response method as it's no longer needed with function calling

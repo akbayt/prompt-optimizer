@@ -1,6 +1,8 @@
+import asyncio
 from typing import Dict, Any, List, Optional
 from providers.openai_provider import OpenAIProvider
 from providers.base_provider import ProviderResponse
+from config import MAX_RETRIES, RETRY_DELAY
 
 
 class Model:
@@ -19,13 +21,22 @@ class Model:
                        prompt: str,
                        functions: Optional[List[Dict[str, Any]]] = None,
                        function_call: Optional[Dict[str, str]] = None) -> ProviderResponse:
-        return await self.provider.generate(
-            model_name=self.model_name,
-            prompt=prompt,
-            temperature=self.temperature,
-            functions=functions,
-            function_call=function_call
-        )
+        for attempt in range(MAX_RETRIES):
+            try:
+                return await self.provider.generate(
+                    model_name=self.model_name,
+                    prompt=prompt,
+                    temperature=self.temperature,
+                    functions=functions,
+                    function_call=function_call
+                )
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    print(f"Error generating model output: {str(e)}. Retrying in {RETRY_DELAY} seconds...")
+                    await asyncio.sleep(RETRY_DELAY)
+                else:
+                    print(f"Failed to generate model output after {MAX_RETRIES} attempts. Error: {str(e)}")
+                    return self.provider.create_response(error=str(e))
 
     def get_model_info(self) -> Dict[str, Any]:
         return {
