@@ -1,13 +1,13 @@
 # Prompt Optimizer
 
 ```mermaid
-flowchart LR
-    A([Start]) -->|Initialize| B[Generate Prompt Variations]
-    B --> C[Test Against Dataset]
-    C --> D[Evaluate Outputs]
+flowchart
+    A([Start]) --> B(Generate Prompt Variations)
+    B --> C(Test Against Dataset)
+    C --> D(Evaluate Outputs)
     D --> E{Meets Accuracy Threshold?}
-    E -->|No| B
-    E -->|Yes| F([End])
+    E -->|"No <br> backpropagate <br>test results"| B
+    E --> |Yes| F([Best Result])
 ```
 
 ## Why?
